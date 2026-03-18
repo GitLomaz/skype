@@ -1,103 +1,139 @@
-# Skype 1.1 - Cloud Run Deployment
+# Skype 1.2 - Firebase Chat Application
 
-A retro-styled Firebase chat application ready for Google Cloud Run.
+A retro-styled Firebase chat application with a pure client-side architecture.
 
 ## Prerequisites
 
-- Google Cloud Platform account with billing enabled
-- Firebase project configured
-- Secrets stored in Google Cloud Secret Manager
+- Firebase project with Firestore enabled
+- Firebase CLI installed (for Firebase Hosting deployment)
 
-## Required Secrets in Secret Manager
+## Setup
 
-Create the following secrets in Google Cloud Secret Manager:
+### 1. Configure Firebase
 
-- `SKYPE_API_KEY`
-- `SKYPE_AUTH_DOMAIN`
-- `SKYPE_PROJECT_ID`
-- `SKYPE_STORAGE_BUCKET`
-- `SKYPE_MESSAGING_SENDER_ID`
-- `SKYPE_APP_ID`
+Edit [main.js](main.js) and replace the placeholder values with your Firebase project configuration:
 
-## Deploy to Cloud Run (via Console)
+```javascript
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+```
 
-### Step 1: Enable Required APIs
+You can find these values in:
+- Firebase Console → Project Settings → General → Your apps → Web app
 
-1. Go to **APIs & Services** > **Library**
-2. Enable:
-   - Cloud Run API
-   - Cloud Build API
-   - Artifact Registry API
-   - Secret Manager API
+### 2. Configure Firestore Security Rules
 
-### Step 2: Create Secrets (if not already done)
+In your Firebase Console, set up Firestore security rules to control access:
 
-1. Go to **Security** > **Secret Manager**
-2. Click **CREATE SECRET** for each required secret
-3. Name them exactly as listed above
-4. Paste the corresponding Firebase config values
-5. Click **CREATE SECRET**
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /conversations/{conversationId}/messages/{messageId} {
+      allow read, write: if true; // Adjust based on your security needs
+    }
+  }
+}
+```
 
-### Step 3: Deploy to Cloud Run
+## Deployment Options
 
-1. Go to **Cloud Run** in GCP Console
-2. Click **CREATE SERVICE**
-3. Select **Deploy one revision from an existing container image** OR **Continuously deploy from a repository**
+### Option 1: Firebase Hosting (Recommended)
 
-#### Option A: Deploy from Source Code (Recommended)
+1. Install Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   ```
 
-1. Select **Continuously deploy from a repository (source)**
-2. Click **SET UP WITH CLOUD BUILD**
-3. Select your repository (GitHub, Bitbucket, etc.)
-4. Choose **Dockerfile** as the build type
-5. Click **SAVE**
+2. Login to Firebase:
+   ```bash
+   firebase login
+   ```
 
-#### Option B: Build and Deploy Manually
+3. Initialize Firebase Hosting:
+   ```bash
+   firebase init hosting
+   ```
+   - Select your Firebase project
+   - Set public directory: `.` (current directory)
+   - Configure as single-page app: `Yes`
+   - Don't overwrite index.html: `No`
 
-1. Build the image locally or via Cloud Build
-2. Push to Artifact Registry or Container Registry
-3. Select **Deploy one revision from an existing container image**
-4. Enter your image URL
+4. Deploy:
+   ```bash
+   firebase deploy --only hosting
+   ```
 
-### Step 4: Configure the Service
+5. Access your app at: `https://YOUR_PROJECT_ID.web.app`
 
-1. **Service name**: `skype-chat`
-2. **Region**: Choose your preferred region (e.g., `us-central1`)
-3. **Authentication**: Select **Allow unauthenticated invocations**
-4. Click **CONTAINER, NETWORKING, SECURITY** to expand advanced settings
+### Option 2: GitHub Pages
 
-### Step 5: Configure Secrets
+1. Push your code to GitHub
+2. Go to repository Settings → Pages
+3. Select branch and root folder
+4. Your app will be available at: `https://YOUR_USERNAME.github.io/REPO_NAME`
 
-1. Go to the **VARIABLES & SECRETS** tab
-2. Click **REFERENCE A SECRET** for each secret:
-   - **Secret**: Select `SKYPE_API_KEY`
-   - **Exposed as**: Environment variable
-   - **Name**: `SKYPE_API_KEY`
-   - Click **DONE**
-3. Repeat for all 6 secrets:
-   - `SKYPE_AUTH_DOMAIN`
-   - `SKYPE_PROJECT_ID`
-   - `SKYPE_STORAGE_BUCKET`
-   - `SKYPE_MESSAGING_SENDER_ID`
-   - `SKYPE_APP_ID`
+### Option 3: Netlify
 
-### Step 6: Configure Container Settings (Optional)
+1. Drag and drop your project folder to [Netlify Drop](https://app.netlify.com/drop)
+2. Or connect your GitHub repository for automatic deployments
 
-1. **Container port**: `8080` (should be auto-detected)
-2. **Memory**: `512 MiB` (default is fine)
-3. **CPU**: `1` (default is fine)
-4. **Request timeout**: `300` seconds
-5. **Maximum requests per container**: `80`
+### Option 4: Any Static Host
 
-### Step 7: Deploy
-
-1. Click **CREATE** or **DEPLOY**
-2. Wait for deployment to complete (2-5 minutes)
-3. Click on the service URL to access your chat app
+Simply upload all files to any static hosting service:
+- Vercel
+- Cloudflare Pages
+- AWS S3 + CloudFront
+- Azure Static Web Apps
 
 ## Local Development
 
-1. Install dependencies:
+Just open [index.html](index.html) in your browser or use a local server:
+
+```bash
+# Python
+python -m http.server 8080
+
+# Node.js
+npx http-server -p 8080
+
+# PHP
+php -S localhost:8080
+```
+
+Then open `http://localhost:8080` in your browser.
+
+## Usage
+
+Add query parameters to customize your experience:
+
+- `?username=YourName` - Set your display name
+- `?conversation=room-name` - Join a specific chat room
+
+Example: `https://your-app.web.app/?username=Alice&conversation=lobby`
+
+## Features
+
+- 🔥 Real-time messaging with Firebase
+- 💬 Reply to messages
+- 🖼️ Image sharing
+- 🔔 Desktop notifications
+- 🎨 Retro aesthetic
+- 📱 Responsive design
+
+## Note on Firebase API Keys
+
+Firebase API keys in client-side code are safe and intended to be public. Security is enforced through Firestore security rules, not by hiding the keys. However, you should still configure proper security rules to protect your data.
+
+## License
+
+MIT
    ```bash
    npm install
    ```

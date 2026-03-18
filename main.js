@@ -10,14 +10,9 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: process.env.SKYPE_API_KEY,
-  authDomain: process.env.SKYPE_AUTH_DOMAIN,
-  projectId: process.env.SKYPE_PROJECT_ID,
-  storageBucket: process.env.SKYPE_STORAGE_BUCKET,
-  messagingSenderId: process.env.SKYPE_MESSAGING_SENDER_ID,
-  appId: process.env.SKYPE_APP_ID
-};
+// Fetch Firebase config from server
+const configResponse = await fetch('/api/config');
+const firebaseConfig = await configResponse.json();
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

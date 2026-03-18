@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skype 1.1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="main.css"/>
+  <script type="module" defer src="main.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">Skype 1.1</div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="messages" id="messages"></div>
+      <form class="message-form" id="messageForm">
+        <div id="replyBanner" style="display: none; padding: 4px; font-size: 0.8em; color: yellow; background: #330033;"></div>
+        <textarea id="messageInput" placeholder="Type your message..." maxlength="2000" autocomplete="off" rows="1"></textarea>
+        <button type="button" id="imageBtn" title="Send image">🖼️</button>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+
+    <div id="imageModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Send Image</h2>
+          <span class="close-modal" id="closeModal">&times;</span>
+        </div>
+        <div id="imageDropZone" class="image-drop-zone" tabindex="0">
+          <p><strong>Paste an image here</strong></p>
+          <p>or drag and drop an image</p>
+        </div>
+        <div id="imagePreview" class="image-preview"></div>
+        <div class="modal-buttons">
+          <button type="button" id="cancelImageBtn" class="btn-secondary">Cancel</button>
+          <button type="button" id="sendImageBtn" class="btn-primary" disabled>Send Image</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:9999;">
+    <img id="lightbox-img" src="" alt="Zoomed image" style="max-width:90%; max-height:90%; border:6px solid #fff; border-radius:8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);" />
+  </div>
+
+  <audio id="message-sound" src="message.mp3" preload="auto"></audio>
+</body>
+</html>

@@ -10,14 +10,13 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-// Firebase configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAHHLEobWD9erp9zcF4H_5GAtQHBJI2-tE",
+  authDomain: "skype-a824b.firebaseapp.com",
+  projectId: "skype-a824b",
+  storageBucket: "skype-a824b.firebasestorage.app",
+  messagingSenderId: "1097664857333",
+  appId: "1:1097664857333:web:c492bd5ce5801986dd31bc"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -51,9 +50,29 @@ function getMessagesCollection() {
 }
 
 async function emitChatMessage({ message, replyTo, images }) {
-  const cleanMessage = String(message || "").trim();
+  let cleanMessage = String(message || "").trim();
 
   if (!cleanMessage && (!images || images.length === 0)) return;
+
+  // --- replacements ---
+  const shrug = "¯\\_(ツ)_/¯";
+
+  const lolResponses = [
+    "ROFLCOPTER",
+    "LMAO",
+    "😂",
+  ];
+
+  // Replace /shrug (case insensitive)
+  cleanMessage = cleanMessage.replace(/\/shrug/gi, shrug);
+
+  if (cleanMessage.toLowerCase() === "lol") {
+    cleanMessage = lolResponses[Math.floor(Math.random() * lolResponses.length)];
+  }
+
+  if (cleanMessage.toLowerCase() === "ahh" || cleanMessage.toLowerCase() === "ahhh" || cleanMessage.toLowerCase() === "aah") {
+    cleanMessage = 'AAAARRRRRGGGHHH!!!';
+  }
 
   await addDoc(getMessagesCollection(), {
     username,
@@ -67,24 +86,35 @@ async function emitChatMessage({ message, replyTo, images }) {
 function subscribeToChat() {
   const q = query(
     getMessagesCollection(),
-    orderBy("timestamp", "asc"),
+    orderBy("timestamp", "desc"),
     limit(200)
   );
 
   onSnapshot(q, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type !== "added") return;
+    // reverse the *added* changes so oldest renders first
+    const changes = snapshot
+      .docChanges()
+      .filter((c) => c.type === "added")
+      .reverse();
 
+    changes.forEach((change) => {
       const doc = change.doc;
+
       if (renderedMessageIds.has(doc.id)) return;
       renderedMessageIds.add(doc.id);
 
       const data = doc.data();
-      displayMessage(doc.id, data.username, {
-        message: data.message || "",
-        replyTo: data.replyTo || null,
-        images: data.images || []
-      }, data.timestamp);
+
+      displayMessage(
+        doc.id,
+        data.username,
+        {
+          message: data.message || "",
+          replyTo: data.replyTo || null,
+          images: data.images || []
+        },
+        data.timestamp
+      );
     });
   }, (error) => {
     console.error("Firestore listener error:", error);
